@@ -1,8 +1,12 @@
 import express from "express";
 import userRoutes from "./user.routes.js";
 import authRoutes from "./auth.routes.js";
+import complaintRoutes from "./complaint.routes.js";
+import dashboardRoutes from "./dashboard.routes.js";
 const router = express.Router();
-
+console.log("Main router loaded successfully");
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
+router.use("/complaints", complaintRoutes);
+router.use("/dashboard", dashboardRoutes);
 export default router;

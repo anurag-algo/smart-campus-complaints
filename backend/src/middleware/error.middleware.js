@@ -3,19 +3,23 @@ import ApiError from "../utils/apiError.js";
 const errorHandler = (err, req, res, next) => {
   let error = err;
 
-  //if error is not an instance of ApiError, convert it
   if (!(error instanceof ApiError)) {
     const statusCode =
-      error.statusCode || error.name === "ValidationError" ? 400 : 500;
+      error.statusCode || (error.name === "ValidationError" ? 400 : 500);
     const message = error.message || "Internal Server Error";
-    error = new ApiError(statusCode, message, err.errors || [], err.stack);
+    error = new ApiError(statusCode, message, error.errors || [], error.stack);
   }
+
   const response = {
     success: false,
     message: error.message,
-    errors: error.errors.length > 0 ? error.errors : undefined,
+    errors:
+      Array.isArray(error.errors) && error.errors.length > 0
+        ? error.errors
+        : undefined,
     ...(process.env.NODE_ENV === "development" && { stack: error.stack }),
   };
+
   return res.status(error.statusCode).json(response);
 };
 

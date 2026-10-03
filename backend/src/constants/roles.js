@@ -1,6 +1,10 @@
 const ROLES = {
   USER: "user",
   ADMIN: "admin",
-  AGENT: "AGENT",
+  AGENT: "agent",
 };
+
+export const normalizeRole = (role) =>
+  typeof role === "string" ? role.trim().toLowerCase() : "";
+
 export default ROLES;

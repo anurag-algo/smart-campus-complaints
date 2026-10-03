@@ -3,41 +3,58 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiResponse.js";
 import generateToken from "../utils/token.js";
+import ROLES, { normalizeRole } from "../constants/roles.js";
+
 //register a new user
 //POST /api/v1/auth/register
 
 export const register = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
-  //check if user exist
-  const existingUser = await User.findOne({ email });
+  const { name, username, email, password, role, department } = req.body;
+
+  if (!name || !email || !password) {
+    throw new ApiError(400, "Name, email and password are required");
+  }
+
+  const normalizedEmail = String(email).trim().toLowerCase();
+  const normalizedRole = normalizeRole(role || ROLES.USER);
+  const allowedRoles = [ROLES.USER, ROLES.ADMIN, ROLES.AGENT];
+
+  if (!allowedRoles.includes(normalizedRole)) {
+    throw new ApiError(400, "Invalid role provided");
+  }
+
+  const existingUser = await User.findOne({ email: normalizedEmail });
   if (existingUser) {
     throw new ApiError(400, "User already exists");
   }
 
-  //create user
+  const generatedUsername =
+    username || `${normalizedEmail.split("@")[0]}_${Date.now()}`;
+
   const user = await User.create({
+    username: generatedUsername,
     name,
-    email,
+    email: normalizedEmail,
     password,
-    role: role || "user",
+    role: normalizedRole,
     department: department || null,
   });
 
-  //Generate token
-  const token = genearateToken(user._id, user.role);
+  const token = generateToken(user._id, user.role);
 
-  //Exclude password from output
-  const userReasponse = {
+  const userResponse = {
     _id: user._id,
+    username: user.username,
     name: user.name,
     email: user.email,
     role: user.role,
     department: user.department,
     createdAt: user.createdAt,
   };
+
   res.status(201).json(
-    new ApiResponse(true, "User registered successfully", {
-      user: userReasponse,
+    new ApiResponse(201, "User registered successfully", {
+      user: userResponse,
       token,
     }),
   );
@@ -50,9 +67,12 @@ export const login = asyncHandler(async (req, res) => {
   if (!email || !password) {
     throw new ApiError(400, "Email and password are required");
   }
-  //Explicitly select password since it is hidden by default in model
 
-  const user = await User.findOne({ email }).select("+password");
+  const normalizedEmail = String(email).trim().toLowerCase();
+
+  const user = await User.findOne({ email: normalizedEmail }).select(
+    "+password",
+  );
   if (!user) {
     throw new ApiError(401, "Invalid email or password");
   }
@@ -66,6 +86,7 @@ export const login = asyncHandler(async (req, res) => {
 
   const userResponse = {
     _id: user._id,
+    username: user.username,
     name: user.name,
     email: user.email,
     role: user.role,
@@ -73,7 +94,7 @@ export const login = asyncHandler(async (req, res) => {
   };
 
   res.status(200).json(
-    new ApiResponse(true, "User logged in successfully", {
+    new ApiResponse(200, "User logged in successfully", {
       user: userResponse,
       token,
     }),
@@ -81,5 +102,5 @@ export const login = asyncHandler(async (req, res) => {
 });
 
 export const logout = asyncHandler(async (req, res) => {
-  res.status(200).json(new ApiResponse(true, "User logged out successfully"));
+  res.status(200).json(new ApiResponse(200, "User logged out successfully"));
 });
