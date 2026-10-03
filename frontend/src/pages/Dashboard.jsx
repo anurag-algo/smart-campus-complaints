@@ -1,0 +1,14 @@
+import { ArrowUpRight, Clock3, CheckCircle2, ClipboardList, Plus, ArrowRight, MapPin, CalendarDays } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import Status from '../components/Status.jsx'
+import { initialComplaints } from '../data.js'
+const stats=[{label:'Total complaints',value:'12',change:'+2 this month',icon:ClipboardList,tone:'blue'},{label:'In progress',value:'03',change:'Being reviewed',icon:Clock3,tone:'orange'},{label:'Resolved',value:'08',change:'67% resolution rate',icon:CheckCircle2,tone:'green'}]
+export default function Dashboard(){
+ return <div className="page-stack">
+  <div className="welcome-row"><div><div className="eyebrow">THURSDAY, OCTOBER 02, 2026</div><h1>Good evening, Suresh <span>✦</span></h1><p>Here's what's happening with your complaints today.</p></div><Link className="btn btn-primary" to="/new-complaint"><Plus size={17}/> Submit a complaint</Link></div>
+  <section className="stats-grid">{stats.map(({label,value,change,icon:Icon,tone})=><article className="stat-card" key={label}><div className={`stat-icon ${tone}`}><Icon size={20}/></div><div className="stat-label">{label}</div><div className="stat-value">{value}</div><div className="stat-change">{change}</div><ArrowUpRight className="stat-arrow" size={18}/></article>)}</section>
+  <section className="content-grid"><article className="panel recent-panel"><div className="panel-head"><div><h2>Recent complaints</h2><p>Keep track of your latest submissions.</p></div><Link className="text-link" to="/my-complaints">View all <ArrowRight size={15}/></Link></div><div className="table-wrap"><table><thead><tr><th>COMPLAINT</th><th>DATE SUBMITTED</th><th>STATUS</th><th></th></tr></thead><tbody>{initialComplaints.slice(0,3).map(c=><tr key={c.id}><td><b>{c.title}</b><small>{c.id} · {c.category}</small></td><td>{c.date}</td><td><Status value={c.status}/></td><td><Link className="row-arrow" to="/my-complaints">↗</Link></td></tr>)}</tbody></table></div></article>
+  <aside className="panel tip-panel"><div className="tip-art"><div className="tip-sun"/><div className="tip-building">⌂</div><div className="tip-spark">✦</div></div><span className="tag">QUICK TIP</span><h3>Every voice matters.</h3><p>Share clear details and photos when reporting an issue. It helps the right team resolve it faster.</p><Link to="/new-complaint" className="text-link">Report an issue <ArrowRight size={15}/></Link></aside></section>
+  <section className="bottom-banner"><div className="banner-icon"><MapPin size={20}/></div><div><b>Your community, your say.</b><p>Help make your neighborhood better, one report at a time.</p></div><div className="banner-meta"><CalendarDays size={16}/> Updates are tracked here</div></section>
+ </div>
+}

@@ -1,0 +1,1 @@
+export default function Status({value}) { const cls=value.toLowerCase().replace(' ','-'); return <span className={`status status-${cls}`}><i/>{value}</span> }
