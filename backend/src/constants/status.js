@@ -1,0 +1,3 @@
+const STATUS = {
+  OPEN: "open",
+};
